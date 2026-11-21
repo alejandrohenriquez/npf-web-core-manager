@@ -64,35 +64,22 @@ elseif ($Action -eq "bump") {
 }
 
 # 1. Actualizar package.json
-$UpdatedPkg = [regex]::Replace(
-    $PkgContent,
-    '("version"\s*:\s*)"[^"]+"',
-    "`${1}`"$NewVersion`"",
-    1
-)
+$PkgRegex = [regex]'("version"\s*:\s*)"[^"]+"'
+$UpdatedPkg = $PkgRegex.Replace($PkgContent, "`${1}`"$NewVersion`"", 1)
 Set-Content -Path $PackageJsonPath -Value $UpdatedPkg -NoNewline -Encoding UTF8
 
-# 2. Actualizar package-lock.json (las dos primeras ocurrencias: raíz y packages[""])
+# 2. Actualizar package-lock.json (solo las 2 primeras ocurrencias: raíz y packages[""])
 if (Test-Path $PackageLockPath) {
     $LockContent = Get-Content -Path $PackageLockPath -Raw
-    $UpdatedLock = [regex]::Replace(
-        $LockContent,
-        '("version"\s*:\s*)"[^"]+"',
-        "`${1}`"$NewVersion`"",
-        2
-    )
+    $UpdatedLock = $PkgRegex.Replace($LockContent, "`${1}`"$NewVersion`"", 2)
     Set-Content -Path $PackageLockPath -Value $UpdatedLock -NoNewline -Encoding UTF8
 }
 
 # 3. Actualizar src/version.ts
 if (Test-Path $VersionTsPath) {
     $TsContent = Get-Content -Path $VersionTsPath -Raw
-    $UpdatedTs = [regex]::Replace(
-        $TsContent,
-        '(APP_VERSION\s*=\s*)' + "'" + '[^' + "'" + ']+' + "'",
-        "`${1}'$NewVersion'",
-        1
-    )
+    $TsRegex = [regex]('(APP_VERSION\s*=\s*)' + "'" + '[^' + "'" + ']+' + "'")
+    $UpdatedTs = $TsRegex.Replace($TsContent, "`${1}'$NewVersion'", 1)
     Set-Content -Path $VersionTsPath -Value $UpdatedTs -NoNewline -Encoding UTF8
 }
 
