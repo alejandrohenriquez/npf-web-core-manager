@@ -47,6 +47,9 @@ Push-Location $ProjectDir
 try {
     docker buildx build `
         --platform $Platform `
+        --build-arg "APP_VERSION=$Version" `
+        --label "org.opencontainers.image.title=$ImageName" `
+        --label "org.opencontainers.image.version=$Version" `
         -t $VersionTag `
         -t $LatestTag `
         --load `
