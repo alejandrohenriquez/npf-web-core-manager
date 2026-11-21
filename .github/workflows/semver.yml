@@ -1,0 +1,77 @@
+name: SemVer Release
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: "Tipo de incremento SemVer"
+        required: true
+        default: "patch"
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+permissions:
+  contents: write
+
+jobs:
+  semver:
+    if: "!contains(github.event.head_commit.message, '[skip ci]') && github.actor != 'github-actions[bot]'"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies and verify build
+        run: |
+          npm ci
+          npm run build
+
+      - name: Bump SemVer version
+        id: bump
+        shell: pwsh
+        run: |
+          $commitMsg = '${{ github.event.head_commit.message }}'
+          $dispatchBump = '${{ inputs.bump }}'
+
+          if (-not [string]::IsNullOrWhiteSpace($dispatchBump)) {
+            $part = $dispatchBump
+          }
+          elseif ($commitMsg -match '(?m)(BREAKING CHANGE|^[a-z]+(\([^)]+\))?!:)') {
+            $part = "major"
+          }
+          elseif ($commitMsg -match '^feat(\([^)]+\))?:') {
+            $part = "minor"
+          }
+          else {
+            $part = "patch"
+          }
+
+          Write-Host "Aplicando incremento SemVer: $part"
+          $newVersion = (./script/semver.ps1 -Action bump -Part $part | Select-Object -Last 1).Trim()
+          "version=$newVersion" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+
+      - name: Commit and Tag new version
+        run: |
+          VERSION="${{ steps.bump.outputs.version }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json package-lock.json src/version.ts
+          git commit -m "chore(release): v${VERSION} [skip ci]"
+          git tag -a "v${VERSION}" -m "Release v${VERSION}"
+          git push origin HEAD:main --follow-tags
