@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Layers, HelpCircle, LayoutDashboard, GitBranch } from 'lucide-react';
 import { APP_VERSION } from '../../version';
+import { getBackendDisplayHost } from '../../services/apiClient';
 
 export const Header: React.FC = () => {
   const location = useLocation();
@@ -52,7 +53,7 @@ export const Header: React.FC = () => {
         <div className="flex items-center space-x-3">
           <div className="flex items-center space-x-2 px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-mono border border-slate-200">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span>127.0.0.1:8010</span>
+            <span>{getBackendDisplayHost()}</span>
           </div>
         </div>
       </div>
