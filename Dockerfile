@@ -20,8 +20,11 @@ RUN npm run build
 # Stage 2: Serve static assets with Nginx
 FROM nginx:1.27-alpine AS runtime
 
-# Copy custom nginx configuration
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+ENV NPF_BACKEND_URL=http://svc-core-manager:8000 \
+    NGINX_ENVSUBST_FILTER=^NPF_
+
+# Copy custom nginx configuration template (processed via envsubst at container startup)
+COPY nginx.conf /etc/nginx/templates/default.conf.template
 
 # Copy build files from builder stage
 COPY --from=builder /app/dist /usr/share/nginx/html
