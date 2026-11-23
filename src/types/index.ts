@@ -172,3 +172,47 @@ export interface StoryLog {
   metadata?: Record<string, any>;
   created_at: string;
 }
+
+
+export interface RepositoryServiceAlias {
+  id: string;
+  project_id: string;
+  service_key: string;
+  target_repository_id: string;
+  target_repository_name: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface RepositoryGraphNode {
+  id: string;
+  name: string;
+  repo_type: string;
+  specs_count: number;
+  specs_inventory: string[];
+  is_unresolved: boolean;
+}
+
+export interface RepositoryGraphEdgeDetail {
+  service_key: string;
+  endpoints_count: number;
+  resolution_method: string;
+  source_file?: string;
+}
+
+export interface RepositoryGraphEdge {
+  id: string;
+  source_id: string;
+  target_id: string;
+  endpoints_count: number;
+  service_keys: string[];
+  resolution_methods: string[];
+  details: RepositoryGraphEdgeDetail[];
+}
+
+export interface RepositoryGraphResponse {
+  project_key: string;
+  nodes: RepositoryGraphNode[];
+  edges: RepositoryGraphEdge[];
+  aliases: RepositoryServiceAlias[];
+}

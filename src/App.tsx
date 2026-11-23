@@ -7,6 +7,7 @@ import { useUngroupedChangesQuery } from './hooks/useUngroupedChangesQuery';
 import { useQuestionsInboxQuery } from './hooks/useQuestionsInboxQuery';
 import { ProjectDashboardCard } from './modules/projects/ProjectDashboardCard';
 import { ProjectRepositoryMatrix } from './modules/projects/ProjectRepositoryMatrix';
+import { ProjectRepositoryGraph } from './modules/projects/ProjectRepositoryGraph';
 import { BoardKanbanView } from './modules/board/BoardKanbanView';
 import { BoardFilterToolbar } from './modules/board/BoardFilterToolbar';
 import { UngroupedChangesTable } from './modules/changes/UngroupedChangesTable';
@@ -418,7 +419,7 @@ function BoardView() {
 function ChangesAndReposView() {
   const { projectKey } = useParams<{ projectKey: string }>();
   const queryClient = useQueryClient();
-  const [activeSubTab, setActiveSubTab] = useState<'changes' | 'matrix'>('changes');
+  const [activeSubTab, setActiveSubTab] = useState<'changes' | 'matrix' | 'graph'>('changes');
   const [onlyUngrouped, setOnlyUngrouped] = useState<boolean>(false);
   const [selectedChangesForGrouping, setSelectedChangesForGrouping] = useState<string[]>([]);
   const [isGroupDialogOpen, setIsGroupDialogOpen] = useState(false);
@@ -524,6 +525,14 @@ function ChangesAndReposView() {
           >
             Mapa de Repositorios ({repositories.length})
           </button>
+          <button
+            onClick={() => setActiveSubTab('graph')}
+            className={`px-3 py-1.5 rounded transition ${
+              activeSubTab === 'graph' ? 'bg-white text-indigo-700 shadow-sm font-semibold' : 'text-slate-600'
+            }`}
+          >
+            Grafo de Datos
+          </button>
         </div>
       </div>
 
@@ -540,8 +549,10 @@ function ChangesAndReposView() {
           onlyUngrouped={onlyUngrouped}
           onToggleOnlyUngrouped={setOnlyUngrouped}
         />
-      ) : (
+      ) : activeSubTab === 'matrix' ? (
         <ProjectRepositoryMatrix repositories={repositories} />
+      ) : (
+        <ProjectRepositoryGraph projectKey={projectKey!} repositories={repositories} />
       )}
 
       {/* Drawer to inspect any Change's Tasks & OpenSpec Artifacts */}
@@ -631,7 +642,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
       <Header />
-      <main className="flex-1 max-w-7xl w-full mx-auto px-6 py-8">
+      <main className="flex-1 max-w-[1600px] w-full mx-auto px-6 py-8">
         <Routes>
           <Route path="/" element={<DashboardView />} />
           <Route path="/questions" element={<QuestionsView />} />

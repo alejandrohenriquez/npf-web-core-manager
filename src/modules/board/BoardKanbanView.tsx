@@ -17,44 +17,46 @@ export const BoardKanbanView: React.FC<BoardKanbanViewProps> = ({ stories, onSto
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-start">
-      {columns.map((col) => {
-        const colStories = stories.filter((s) => s.status === col.id);
+    <div className="overflow-x-auto pb-4">
+      <div className="grid grid-cols-1 md:grid-cols-[repeat(5,minmax(280px,1fr))] gap-4 items-start">
+        {columns.map((col) => {
+          const colStories = stories.filter((s) => s.status === col.id);
 
-        return (
-          <div
-            key={col.id}
-            className="flex flex-col rounded-xl bg-slate-100/70 p-3 min-h-[500px] border border-slate-200"
-          >
-            {/* Column Header */}
-            <div className={`flex items-center justify-between pb-3 mb-3 border-b-2 ${col.color}`}>
-              <span className="text-xs font-bold uppercase text-slate-700 tracking-wider">
-                {col.label}
-              </span>
-              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-200 text-xs font-semibold text-slate-700">
-                {colStories.length}
-              </span>
+          return (
+            <div
+              key={col.id}
+              className="flex flex-col rounded-xl bg-slate-100/70 p-3 min-h-[500px] border border-slate-200"
+            >
+              {/* Column Header */}
+              <div className={`flex items-center justify-between pb-3 mb-3 border-b-2 ${col.color}`}>
+                <span className="text-xs font-bold uppercase text-slate-700 tracking-wider">
+                  {col.label}
+                </span>
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-200 text-xs font-semibold text-slate-700">
+                  {colStories.length}
+                </span>
+              </div>
+
+              {/* Stories Cards */}
+              <div className="space-y-3 overflow-y-auto">
+                {colStories.map((story) => (
+                  <BoardStoryCard
+                    key={story.id}
+                    story={story}
+                    onClick={() => onStoryClick(story)}
+                  />
+                ))}
+
+                {colStories.length === 0 && (
+                  <div className="py-8 text-center text-xs text-slate-400 border border-dashed border-slate-200 rounded-lg">
+                    Sin historias
+                  </div>
+                )}
+              </div>
             </div>
-
-            {/* Stories Cards */}
-            <div className="space-y-3 overflow-y-auto">
-              {colStories.map((story) => (
-                <BoardStoryCard
-                  key={story.id}
-                  story={story}
-                  onClick={() => onStoryClick(story)}
-                />
-              ))}
-
-              {colStories.length === 0 && (
-                <div className="py-8 text-center text-xs text-slate-400 border border-dashed border-slate-200 rounded-lg">
-                  Sin historias
-                </div>
-              )}
-            </div>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
     </div>
   );
 };

@@ -1,5 +1,11 @@
 import { request } from './apiClient';
-import { Project, ProjectRepository, Epic } from '../types';
+import {
+  Project,
+  ProjectRepository,
+  Epic,
+  RepositoryGraphResponse,
+  RepositoryServiceAlias,
+} from '../types';
 
 export const projectsService = {
   getProjects: async () => {
@@ -27,6 +33,28 @@ export const projectsService = {
 
   getRepositories: async (projectRef: string) => {
     return request<ProjectRepository[]>(`projects/${projectRef}/repositories`);
+  },
+
+  getRepositoryGraph: async (projectRef: string, excludeTypes = 'LIB,TEMPLATE') => {
+    const query = excludeTypes ? `?exclude_types=${encodeURIComponent(excludeTypes)}` : '';
+    return request<RepositoryGraphResponse>(`projects/${projectRef}/repository-graph${query}`);
+  },
+
+  upsertRepositoryAlias: async (
+    projectRef: string,
+    payload: { service_key: string; target_repository: string },
+  ) => {
+    return request<RepositoryServiceAlias>(`projects/${projectRef}/repository-aliases`, {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    });
+  },
+
+  deleteRepositoryAlias: async (projectRef: string, serviceKey: string) => {
+    return request<void>(
+      `projects/${projectRef}/repository-aliases/${encodeURIComponent(serviceKey)}`,
+      { method: 'DELETE' },
+    );
   },
 
   getEpics: async (projectRef: string) => {
