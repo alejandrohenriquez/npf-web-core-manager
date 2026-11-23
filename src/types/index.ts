@@ -90,6 +90,15 @@ export interface Change {
   tasks?: TaskItem[];
 }
 
+export interface StoryDependencyItem {
+  id: string;
+  key: string;
+  title: string;
+  status: 'BACKLOG' | 'TODO' | 'IN_PROGRESS' | 'IN_REVIEW' | 'DONE' | 'CANCELLED';
+  is_closed: boolean;
+  is_pending: boolean;
+}
+
 export interface Story {
   id: string;
   project_id: string;
@@ -113,6 +122,13 @@ export interface Story {
     percentage: number;
   };
   open_questions_count: number;
+  depends_on?: StoryDependencyItem[];
+  depends_on_keys?: string[];
+  dependencies_total?: number;
+  dependencies_closed_count?: number;
+  pending_dependencies_count?: number;
+  pending_dependency_keys?: string[];
+  closed_dependency_keys?: string[];
   changes: Change[];
   created_at: string;
   updated_at: string;

@@ -1,5 +1,5 @@
 import React from 'react';
-import { HelpCircle, CheckCircle2, Clock, AlertTriangle, Layers } from 'lucide-react';
+import { HelpCircle, CheckCircle2, Clock, AlertTriangle, Layers, Link2 } from 'lucide-react';
 import { Card } from '../../components/ui/card';
 import { Badge } from '../../components/ui/badge';
 import { Story, Change } from '../../types';
@@ -81,6 +81,29 @@ export const BoardStoryCard: React.FC<BoardStoryCardProps> = ({ story, onClick }
             style={{ backgroundColor: story.epic.color || '#6366f1' }}
           />
           <span className="text-slate-500 truncate">{story.epic.title}</span>
+        </div>
+      )}
+
+      {/* Story-to-Story Dependencies badge */}
+      {(story.dependencies_total ?? 0) > 0 && (
+        <div className="flex flex-wrap items-center gap-1 text-[10px]">
+          {(story.pending_dependencies_count ?? 0) > 0 ? (
+            <span
+              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200 font-mono"
+              title={`Pendientes: ${(story.pending_dependency_keys || []).join(', ')}`}
+            >
+              <Link2 className="w-3 h-3" />
+              {story.pending_dependencies_count} dep. pendientes
+            </span>
+          ) : (
+            <span
+              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-mono"
+              title={`Cerradas: ${(story.closed_dependency_keys || []).join(', ')}`}
+            >
+              <Link2 className="w-3 h-3" />
+              {story.dependencies_closed_count}/{story.dependencies_total} dep. cerradas
+            </span>
+          )}
         </div>
       )}
 

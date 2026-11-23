@@ -13,7 +13,7 @@ import { changesService } from '../../services/changesService';
 import { questionsService } from '../../services/questionsService';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Badge } from '../../components/ui/badge';
-import { ChevronDown, ChevronUp, FileText, CheckSquare, HelpCircle, History, Layers } from 'lucide-react';
+import { ChevronDown, ChevronUp, FileText, CheckSquare, HelpCircle, History, Layers, Link2 } from 'lucide-react';
 
 interface StoryDetailSheetProps {
   open: boolean;
@@ -178,6 +178,37 @@ export const StoryDetailSheet: React.FC<StoryDetailSheetProps> = ({ open, onClos
                   </div>
                 </div>
               )}
+            </div>
+          )}
+
+          {currentStory.depends_on && currentStory.depends_on.length > 0 && (
+            <div className="pt-2 border-t border-slate-200 space-y-1.5">
+              <div className="flex items-center justify-between text-[11px] font-semibold text-slate-700">
+                <span className="flex items-center gap-1.5">
+                  <Link2 className="w-3.5 h-3.5 text-indigo-600" />
+                  <span>Dependencias ({currentStory.dependencies_total ?? currentStory.depends_on.length})</span>
+                </span>
+                <span className="font-mono text-[10px] text-slate-500">
+                  {currentStory.pending_dependencies_count ?? 0} pendientes · {currentStory.dependencies_closed_count ?? 0} cerradas
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {currentStory.depends_on.map((dep) => (
+                  <span
+                    key={dep.id}
+                    className={`inline-flex items-center gap-1.5 text-[11px] font-mono px-2 py-0.5 rounded border ${
+                      dep.is_closed
+                        ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                        : 'bg-amber-50 text-amber-800 border-amber-200'
+                    }`}
+                    title={dep.title}
+                  >
+                    <span className="font-bold">{dep.key}</span>
+                    <span>[{dep.status}]</span>
+                    <span>{dep.is_closed ? 'Cerrada' : 'Pendiente'}</span>
+                  </span>
+                ))}
+              </div>
             </div>
           )}
         </div>
