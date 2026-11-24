@@ -23,9 +23,11 @@ import {
   useUpsertRepositoryAliasMutation,
 } from '../../hooks/useRepositoryGraphQuery';
 import {
+  NODE_SLOT_WIDTH,
   REPO_TYPE_STYLES,
   computeEdgeStrokeWidth,
   computeLayeredLayout,
+  formatShortRepoName,
   getRepoTypeStyle,
 } from './repositoryGraphLayout';
 import { Sheet } from '../../components/ui/sheet';
@@ -35,6 +37,7 @@ import { Badge } from '../../components/ui/badge';
 
 interface RepositoryNodeData extends Record<string, unknown> {
   node: RepositoryGraphNode;
+  shortName: string;
   size: number;
   dimmed: boolean;
   highlighted: boolean;
@@ -43,38 +46,37 @@ interface RepositoryNodeData extends Record<string, unknown> {
 type RepoFlowNode = Node<RepositoryNodeData, 'repositoryNode'>;
 
 const RepositoryCustomNode: React.FC<NodeProps<RepoFlowNode>> = ({ data }) => {
-  const { node, size, dimmed, highlighted } = data;
+  const { node, shortName, size, dimmed, highlighted } = data;
   const style = getRepoTypeStyle(node.repo_type, node.is_unresolved);
 
   return (
     <div
-      style={{ width: size, height: size }}
+      style={{ width: NODE_SLOT_WIDTH }}
       title={`${node.name} (${node.repo_type}) — ${node.specs_count} specs vigentes`}
-      className={`rounded-full border-2 flex flex-col items-center justify-center p-3 text-center shadow-sm transition-all cursor-pointer select-none ${
-        style.cardClass
-      } ${dimmed ? 'opacity-20' : 'opacity-100'} ${
-        highlighted ? 'ring-4 ring-indigo-400/50 shadow-lg scale-[1.03]' : 'hover:shadow-md'
+      className={`flex flex-col items-center cursor-pointer select-none transition-opacity duration-150 ${
+        dimmed ? 'opacity-20' : 'opacity-100'
       }`}
     >
-      <Handle id="t-top" type="target" position={Position.Top} className="!opacity-0 !w-2 !h-2" />
-      <Handle id="t-left" type="target" position={Position.Left} className="!opacity-0 !w-2 !h-2" />
-      <Handle id="s-left" type="source" position={Position.Left} className="!opacity-0 !w-2 !h-2" />
+      <div
+        style={{ width: size, height: size }}
+        className={`relative rounded-full border-2 flex items-center justify-center shadow-sm transition-all ${
+          style.cardClass
+        } ${highlighted ? 'ring-4 ring-indigo-400/50 shadow-lg scale-110' : 'hover:shadow-md hover:scale-105'}`}
+      >
+        <Handle id="t-top" type="target" position={Position.Top} className="!opacity-0 !w-2 !h-2" />
+        <Handle id="t-left" type="target" position={Position.Left} className="!opacity-0 !w-2 !h-2" />
+        <Handle id="s-left" type="source" position={Position.Left} className="!opacity-0 !w-2 !h-2" />
 
-      <span className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded mb-1 ${style.badgeClass}`}>
-        {node.is_unresolved ? 'UNRESOLVED' : node.repo_type}
+        {node.is_unresolved && <span className="text-xs font-mono font-bold">?</span>}
+
+        <Handle id="s-bottom" type="source" position={Position.Bottom} className="!opacity-0 !w-2 !h-2" />
+        <Handle id="s-right" type="source" position={Position.Right} className="!opacity-0 !w-2 !h-2" />
+        <Handle id="t-right" type="target" position={Position.Right} className="!opacity-0 !w-2 !h-2" />
+      </div>
+
+      <span className="mt-1.5 px-2 py-0.5 rounded-md bg-white/95 border border-slate-200 shadow-sm font-mono text-[11px] font-medium text-slate-800 max-w-[160px] truncate text-center">
+        {shortName}
       </span>
-
-      <span className="font-mono text-[11px] font-semibold leading-tight line-clamp-2 break-words w-full px-1">
-        {node.name}
-      </span>
-
-      <span className="mt-1 text-[10px] font-mono opacity-80">
-        {node.is_unresolved ? 'Clic para mapear' : `${node.specs_count} specs`}
-      </span>
-
-      <Handle id="s-bottom" type="source" position={Position.Bottom} className="!opacity-0 !w-2 !h-2" />
-      <Handle id="s-right" type="source" position={Position.Right} className="!opacity-0 !w-2 !h-2" />
-      <Handle id="t-right" type="target" position={Position.Right} className="!opacity-0 !w-2 !h-2" />
     </div>
   );
 };
@@ -140,13 +142,14 @@ export const ProjectRepositoryGraph: React.FC<ProjectRepositoryGraphProps> = ({
         position: layout.positions[n.id] || { x: 0, y: 0 },
         data: {
           node: n,
-          size: layout.nodeSizes[n.id] || 110,
+          shortName: formatShortRepoName(n.name, projectKey),
+          size: layout.nodeSizes[n.id] || 36,
           dimmed: isDimmed,
           highlighted: isHighlighted,
         },
       };
     });
-  }, [graph, layout, hoveredNodeId, connectedToHovered]);
+  }, [graph, layout, hoveredNodeId, connectedToHovered, projectKey]);
 
   const flowEdges: Edge[] = useMemo(() => {
     if (!graph) return [];
@@ -157,13 +160,14 @@ export const ProjectRepositoryGraph: React.FC<ProjectRepositoryGraphProps> = ({
       const targetLayer = layout.layerIndexById[e.target_id];
       const sameLayer = sourceLayer !== undefined && sourceLayer === targetLayer;
       const isConnected = hoveredNodeId !== null && connectedToHovered.edgesSet.has(e.id);
+      const isHoveredEdge = hoveredEdge?.id === e.id;
       const isDimmed = hoveredNodeId !== null && !isConnected;
       const targetNode = nodeById.get(e.target_id);
       const strokeColor = targetNode?.is_unresolved
         ? '#fb7185'
-        : isConnected || hoveredEdge?.id === e.id
+        : isConnected || isHoveredEdge
           ? '#4f46e5'
-          : '#64748b';
+          : '#94a3b8';
 
       return {
         id: e.id,
@@ -171,31 +175,31 @@ export const ProjectRepositoryGraph: React.FC<ProjectRepositoryGraphProps> = ({
         target: e.target_id,
         sourceHandle: sameLayer ? 's-right' : 's-bottom',
         targetHandle: sameLayer ? 't-left' : 't-top',
-        type: 'smoothstep',
+        type: 'default',
         animated: targetNode?.is_unresolved || isConnected,
         markerEnd: {
           type: MarkerType.ArrowClosed,
           color: strokeColor,
-          width: 16,
-          height: 16,
+          width: 14,
+          height: 14,
         },
         style: {
           strokeWidth: computeEdgeStrokeWidth(e.endpoints_count, maxEndpoints),
           stroke: strokeColor,
           strokeDasharray: targetNode?.is_unresolved ? '5 4' : undefined,
-          opacity: isDimmed ? 0.15 : isConnected ? 1 : 0.78,
+          opacity: isDimmed ? 0.12 : isConnected || isHoveredEdge ? 1 : 0.72,
           transition: 'opacity 150ms ease, stroke 150ms ease',
         },
-        label: `${e.endpoints_count}`,
+        label: isConnected || isHoveredEdge ? `${e.endpoints_count}` : undefined,
         labelStyle: {
           fontSize: 10,
           fontFamily: 'monospace',
-          fill: '#334155',
+          fill: '#1e293b',
           fontWeight: 600,
         },
         labelBgStyle: {
           fill: '#ffffff',
-          fillOpacity: 0.85,
+          fillOpacity: 0.92,
         },
       };
     });
@@ -286,7 +290,7 @@ export const ProjectRepositoryGraph: React.FC<ProjectRepositoryGraphProps> = ({
       </div>
 
       {/* React Flow Canvas */}
-      <div className="relative h-[680px] w-full rounded-xl border border-slate-200 bg-slate-50 overflow-hidden">
+      <div className="relative h-[720px] w-full rounded-xl border border-slate-200 bg-slate-50 overflow-hidden">
         {hoveredEdge && (
           <div className="absolute top-3 right-3 z-10 max-w-sm rounded-lg border border-slate-200 bg-white/95 backdrop-blur px-3.5 py-2.5 shadow-md text-xs space-y-1 pointer-events-none">
             <div className="font-mono font-semibold text-slate-900">
@@ -314,7 +318,7 @@ export const ProjectRepositoryGraph: React.FC<ProjectRepositoryGraphProps> = ({
           edges={flowEdges}
           nodeTypes={nodeTypes}
           fitView
-          fitViewOptions={{ padding: 0.18 }}
+          fitViewOptions={{ padding: 0.2 }}
           minZoom={0.25}
           maxZoom={2}
           onNodeClick={handleNodeClick}
@@ -326,7 +330,7 @@ export const ProjectRepositoryGraph: React.FC<ProjectRepositoryGraphProps> = ({
           }}
           onEdgeMouseLeave={() => setHoveredEdge(null)}
         >
-          <Background gap={20} size={1} color="#cbd5e1" />
+          <Background gap={24} size={1} color="#cbd5e1" />
           <Controls />
           <MiniMap
             pannable

@@ -72,15 +72,26 @@ El cliente HTTP (`src/services/apiClient.ts`) resuelve la URL base de `npf-svc-c
 | `NPF_BACKEND_URL` | Runtime Docker + Nginx | `http://192.168.31.30:8010` (`.env.example`: `http://svc-core-manager:8000`) | Upstream usado por `nginx.conf` en `location /api/` (`proxy_pass`) y fallback final para `env-config.js` si no se definen las anteriores. |
 | `NGINX_ENVSUBST_FILTER` | Runtime Docker (Nginx) | `^NPF_` | Filtro para `envsubst` al procesar `/etc/nginx/templates/default.conf.template` al arrancar Nginx. |
 
-### Ejemplo para Desarrollo Local (`.env`)
+### Ejemplo en PowerShell / Desarrollo Local
+
+> **Importante:** En ejecución local con Vite (`npm run dev`), el navegador solo recibe variables con el prefijo `VITE_`. La variable `NPF_CORE_MANAGER_API_URL` (sin `VITE_`) únicamente aplica dentro del contenedor Docker (al generar `env-config.js`).
+
+Para apuntar `npm run dev` al backend del NAS desde PowerShell, usa **`VITE_NPF_CORE_MANAGER_API_URL`**:
+
+```powershell
+$env:VITE_NPF_CORE_MANAGER_API_URL = "http://192.168.31.30:8010"
+npm run dev
+```
+
+O déjalo persistente en `.env`:
 
 ```powershell
 Copy-Item .env.example .env
 ```
 
 ```dotenv
-# .env (para npm run dev contra backend local en el puerto 8000 u 8010)
-VITE_NPF_CORE_MANAGER_API_URL=http://127.0.0.1:8000/api/v1
+# .env (para npm run dev contra backend local o NAS)
+VITE_NPF_CORE_MANAGER_API_URL=http://192.168.31.30:8010/api/v1
 ```
 
 ### Ejemplo en Docker

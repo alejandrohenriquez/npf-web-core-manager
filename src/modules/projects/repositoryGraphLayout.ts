@@ -11,58 +11,58 @@ export interface RepoTypeStyle {
 export const REPO_TYPE_STYLES: Record<string, RepoTypeStyle> = {
   SERVICE: {
     label: 'SERVICE',
-    cardClass: 'bg-indigo-50 border-indigo-500 text-indigo-900',
+    cardClass: 'bg-indigo-100 border-indigo-500 text-indigo-900',
     badgeClass: 'bg-indigo-100 text-indigo-800',
     dotClass: 'bg-indigo-500',
     strokeHex: '#6366f1',
   },
   BFF: {
     label: 'BFF',
-    cardClass: 'bg-purple-50 border-purple-500 text-purple-900',
+    cardClass: 'bg-purple-100 border-purple-500 text-purple-900',
     badgeClass: 'bg-purple-100 text-purple-800',
     dotClass: 'bg-purple-500',
     strokeHex: '#a855f7',
   },
   WEB: {
     label: 'WEB',
-    cardClass: 'bg-sky-50 border-sky-500 text-sky-900',
+    cardClass: 'bg-sky-100 border-sky-500 text-sky-900',
     badgeClass: 'bg-sky-100 text-sky-800',
     dotClass: 'bg-sky-500',
     strokeHex: '#0ea5e9',
   },
   DOC: {
     label: 'DOC',
-    cardClass: 'bg-amber-50 border-amber-500 text-amber-900',
+    cardClass: 'bg-amber-100 border-amber-500 text-amber-900',
     badgeClass: 'bg-amber-100 text-amber-800',
     dotClass: 'bg-amber-500',
     strokeHex: '#f59e0b',
   },
   INFRA: {
     label: 'INFRA',
-    cardClass: 'bg-emerald-50 border-emerald-500 text-emerald-900',
+    cardClass: 'bg-emerald-100 border-emerald-500 text-emerald-900',
     badgeClass: 'bg-emerald-100 text-emerald-800',
     dotClass: 'bg-emerald-500',
     strokeHex: '#10b981',
   },
   MCP: {
     label: 'MCP',
-    cardClass: 'bg-teal-50 border-teal-500 text-teal-900',
+    cardClass: 'bg-teal-100 border-teal-500 text-teal-900',
     badgeClass: 'bg-teal-100 text-teal-800',
     dotClass: 'bg-teal-500',
     strokeHex: '#14b8a6',
   },
   OTHER: {
     label: 'OTHER',
-    cardClass: 'bg-slate-100 border-slate-400 text-slate-800',
+    cardClass: 'bg-slate-200 border-slate-500 text-slate-800',
     badgeClass: 'bg-slate-200 text-slate-700',
-    dotClass: 'bg-slate-400',
-    strokeHex: '#94a3b8',
+    dotClass: 'bg-slate-500',
+    strokeHex: '#64748b',
   },
   UNRESOLVED: {
     label: 'UNRESOLVED',
-    cardClass: 'border-dashed border-2 border-rose-400 bg-rose-50/70 text-rose-800',
+    cardClass: 'border-dashed border-2 border-rose-500 bg-rose-100/80 text-rose-800',
     badgeClass: 'bg-rose-100 text-rose-800',
-    dotClass: 'bg-rose-400',
+    dotClass: 'bg-rose-500',
     strokeHex: '#fb7185',
   },
 };
@@ -72,9 +72,17 @@ export function getRepoTypeStyle(repoType: string, isUnresolved = false): RepoTy
   return REPO_TYPE_STYLES[repoType.toUpperCase()] || REPO_TYPE_STYLES.OTHER;
 }
 
+export function formatShortRepoName(name: string, projectKey: string): string {
+  const prefix = `${projectKey.trim().toLowerCase()}-`;
+  if (prefix !== '-' && name.toLowerCase().startsWith(prefix)) {
+    return name.slice(prefix.length);
+  }
+  return name;
+}
+
 export function computeNodeSize(specsCount: number, maxSpecs: number): number {
-  const minSize = 110;
-  const maxSize = 190;
+  const minSize = 36;
+  const maxSize = 84;
   const ratio = maxSpecs > 0 ? Math.sqrt(Math.max(0, specsCount) / maxSpecs) : 0;
   return Math.round(minSize + ratio * (maxSize - minSize));
 }
@@ -98,8 +106,10 @@ function resolveLayerBucket(node: RepositoryGraphNode): number {
   if (node.is_unresolved) return 4;
   const upper = (node.repo_type || 'OTHER').toUpperCase();
   const idx = LAYER_ORDER.findIndex((types) => types.includes(upper));
-  return idx >= 0 ? idx : 1; // Fallback to BFF/OTHER layer
+  return idx >= 0 ? idx : 1;
 }
+
+export const NODE_SLOT_WIDTH = 164;
 
 export interface LayeredLayoutResult {
   positions: Record<string, { x: number; y: number }>;
@@ -121,10 +131,10 @@ export function computeLayeredLayout(graphNodes: RepositoryGraphNode[]): Layered
 
   const nonEmptyBuckets = buckets.filter((b) => b.length > 0);
   const positions: Record<string, { x: number; y: number }> = {};
-  const gap = 48;
-  const maxPerRow = 6;
-  const layerSpacingY = 220;
-  const subRowSpacingY = 160;
+  const gapX = 48;
+  const maxPerRow = 5;
+  const layerSpacingY = 250;
+  const subRowSpacingY = 175;
 
   let currentY = 0;
 
@@ -137,18 +147,16 @@ export function computeLayeredLayout(graphNodes: RepositoryGraphNode[]): Layered
 
     subRows.forEach((rowNodes, subIdx) => {
       const totalWidth =
-        rowNodes.reduce((sum, n) => sum + nodeSizes[n.id], 0) +
-        gap * Math.max(0, rowNodes.length - 1);
+        rowNodes.length * NODE_SLOT_WIDTH + gapX * Math.max(0, rowNodes.length - 1);
       let cursorX = -totalWidth / 2;
 
       for (const n of rowNodes) {
-        const size = nodeSizes[n.id];
         positions[n.id] = {
           x: Math.round(cursorX),
           y: Math.round(currentY + subIdx * subRowSpacingY),
         };
         layerIndexById[n.id] = activeLayerIdx;
-        cursorX += size + gap;
+        cursorX += NODE_SLOT_WIDTH + gapX;
       }
     });
 

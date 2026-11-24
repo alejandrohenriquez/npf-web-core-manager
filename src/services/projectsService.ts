@@ -35,7 +35,7 @@ export const projectsService = {
     return request<ProjectRepository[]>(`projects/${projectRef}/repositories`);
   },
 
-  getRepositoryGraph: async (projectRef: string, excludeTypes = 'LIB,TEMPLATE') => {
+  getRepositoryGraph: async (projectRef: string, excludeTypes = 'LIB,TEMPLATE,TOOL') => {
     const query = excludeTypes ? `?exclude_types=${encodeURIComponent(excludeTypes)}` : '';
     return request<RepositoryGraphResponse>(`projects/${projectRef}/repository-graph${query}`);
   },
