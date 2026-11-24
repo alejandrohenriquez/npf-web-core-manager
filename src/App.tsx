@@ -8,6 +8,7 @@ import { useQuestionsInboxQuery } from './hooks/useQuestionsInboxQuery';
 import { ProjectDashboardCard } from './modules/projects/ProjectDashboardCard';
 import { ProjectRepositoryMatrix } from './modules/projects/ProjectRepositoryMatrix';
 import { ProjectRepositoryGraph } from './modules/projects/ProjectRepositoryGraph';
+import { ProjectConstitutionView } from './modules/projects/ProjectConstitutionView';
 import { BoardKanbanView } from './modules/board/BoardKanbanView';
 import { BoardFilterToolbar } from './modules/board/BoardFilterToolbar';
 import { UngroupedChangesTable } from './modules/changes/UngroupedChangesTable';
@@ -419,7 +420,7 @@ function BoardView() {
 function ChangesAndReposView() {
   const { projectKey } = useParams<{ projectKey: string }>();
   const queryClient = useQueryClient();
-  const [activeSubTab, setActiveSubTab] = useState<'changes' | 'matrix' | 'graph'>('changes');
+  const [activeSubTab, setActiveSubTab] = useState<'changes' | 'matrix' | 'graph' | 'constitution'>('changes');
   const [onlyUngrouped, setOnlyUngrouped] = useState<boolean>(false);
   const [selectedChangesForGrouping, setSelectedChangesForGrouping] = useState<string[]>([]);
   const [isGroupDialogOpen, setIsGroupDialogOpen] = useState(false);
@@ -445,11 +446,24 @@ function ChangesAndReposView() {
 
   const activeInspectedChange = detailedInspectedChange || inspectedChange;
 
+  const { data: project } = useQuery({
+    queryKey: ['project', projectKey],
+    queryFn: () => projectsService.getProject(projectKey!),
+    enabled: !!projectKey,
+  });
+
   const { data: repositories = [] } = useQuery({
     queryKey: ['repositories', projectKey],
     queryFn: () => projectsService.getRepositories(projectKey!),
     enabled: !!projectKey,
   });
+
+  const handleSetConstitutionRepository = async (repositoryRef: string | null) => {
+    await projectsService.setConstitutionRepository(projectKey!, repositoryRef);
+    queryClient.invalidateQueries({ queryKey: ['project', projectKey] });
+    queryClient.invalidateQueries({ queryKey: ['projects'] });
+    queryClient.invalidateQueries({ queryKey: ['project_constitution', projectKey] });
+  };
 
   const { data: stories = [] } = useStoriesBoardQuery(projectKey!);
 
@@ -533,6 +547,14 @@ function ChangesAndReposView() {
           >
             Grafo de Datos
           </button>
+          <button
+            onClick={() => setActiveSubTab('constitution')}
+            className={`px-3 py-1.5 rounded transition ${
+              activeSubTab === 'constitution' ? 'bg-white text-indigo-700 shadow-sm font-semibold' : 'text-slate-600'
+            }`}
+          >
+            Constitución
+          </button>
         </div>
       </div>
 
@@ -550,9 +572,18 @@ function ChangesAndReposView() {
           onToggleOnlyUngrouped={setOnlyUngrouped}
         />
       ) : activeSubTab === 'matrix' ? (
-        <ProjectRepositoryMatrix repositories={repositories} />
-      ) : (
+        <ProjectRepositoryMatrix
+          repositories={repositories}
+          constitutionRepositoryId={project?.constitution_repository_id}
+          onSetConstitutionRepository={handleSetConstitutionRepository}
+        />
+      ) : activeSubTab === 'graph' ? (
         <ProjectRepositoryGraph projectKey={projectKey!} repositories={repositories} />
+      ) : (
+        <ProjectConstitutionView
+          projectKey={projectKey!}
+          onGoToRepositories={() => setActiveSubTab('matrix')}
+        />
       )}
 
       {/* Drawer to inspect any Change's Tasks & OpenSpec Artifacts */}

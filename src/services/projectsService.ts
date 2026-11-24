@@ -1,6 +1,7 @@
 import { request } from './apiClient';
 import {
   Project,
+  ProjectConstitutionResponse,
   ProjectRepository,
   Epic,
   RepositoryGraphResponse,
@@ -33,6 +34,18 @@ export const projectsService = {
 
   getRepositories: async (projectRef: string) => {
     return request<ProjectRepository[]>(`projects/${projectRef}/repositories`);
+  },
+
+  getProjectConstitution: async (projectRef: string, section?: string) => {
+    const query = section ? `?section=${encodeURIComponent(section)}` : '';
+    return request<ProjectConstitutionResponse>(`projects/${projectRef}/constitution${query}`);
+  },
+
+  setConstitutionRepository: async (projectRef: string, repositoryRef: string | null) => {
+    return request<Project>(`projects/${projectRef}/constitution-repository`, {
+      method: 'PUT',
+      body: JSON.stringify({ repository_ref: repositoryRef }),
+    });
   },
 
   getRepositoryGraph: async (projectRef: string, excludeTypes = 'LIB,TEMPLATE,TOOL') => {

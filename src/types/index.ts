@@ -10,8 +10,24 @@ export interface Project {
   progress_pct: number | null;
   ungrouped_changes_count: number;
   open_questions_count: number;
+  constitution_repository_id?: string | null;
+  constitution_repository_name?: string | null;
+  has_constitution?: boolean;
+  constitution_sha256?: string | null;
   created_at: string;
   updated_at: string;
+}
+
+export interface ProjectConstitutionResponse {
+  project_key: string;
+  has_constitution: boolean;
+  repository_id?: string | null;
+  repository_name?: string | null;
+  rel_path?: string | null;
+  source_sha256?: string | null;
+  synced_at?: string | null;
+  sections: string[];
+  content?: string | null;
 }
 
 export interface ProjectRepository {
