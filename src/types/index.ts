@@ -282,6 +282,102 @@ export interface DashboardCompletedChangeItem {
   is_estimated_time: boolean;
 }
 
+export interface NextWorkExclusionSummary {
+  blocked_questions: number;
+  pending_dependencies: number;
+  unapproved_or_stale: number;
+  planning_or_pending: number;
+  verifying_ready_to_archive: number;
+  empty_tasks: number;
+}
+
+export interface NextWorkCandidate {
+  story_id?: string | null;
+  story_key?: string | null;
+  story_title?: string | null;
+  story_priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  change_id: string;
+  change_key?: string | null;
+  change_slug: string;
+  repository_name?: string | null;
+  phase: string;
+  tasks_completed: number;
+  tasks_total: number;
+  next_task: TaskItem;
+  artifact_paths: string[];
+}
+
+export interface NextWorkResponse {
+  project_key: string;
+  eligible: boolean;
+  require_approval: boolean;
+  selection_reason?: string | null;
+  message: string;
+  selected: NextWorkCandidate | null;
+  exclusions: NextWorkExclusionSummary;
+  has_constitution: boolean;
+  constitution_repository_name?: string | null;
+  constitution_sha256?: string | null;
+}
+
+export type DashboardReviewItemKind =
+  | 'BLOCKING_QUESTION'
+  | 'ARTIFACT_APPROVAL'
+  | 'VERIFYING_ARCHIVE'
+  | 'PENDING_DEPENDENCY'
+  | 'PLANNING_INCOMPLETE';
+
+export interface DashboardReviewItem {
+  id: string;
+  kind: DashboardReviewItemKind;
+  severity: 'HIGH' | 'MEDIUM';
+  title: string;
+  detail?: string | null;
+  story_id?: string | null;
+  story_key?: string | null;
+  story_title?: string | null;
+  change_id?: string | null;
+  change_key?: string | null;
+  change_slug?: string | null;
+  change_phase?: string | null;
+  repository_name?: string | null;
+  artifact_id?: string | null;
+  artifact_rel_path?: string | null;
+  artifact_review_state?: 'UNREVIEWED' | 'STALE' | 'NEEDS_CHANGES' | null;
+  question_id?: string | null;
+  pending_dependency_keys: string[];
+  created_at?: string | null;
+}
+
+export type DashboardExecutionState =
+  | 'IN_PROGRESS'
+  | 'READY'
+  | 'NEEDS_APPROVAL'
+  | 'BLOCKED_QUESTION'
+  | 'VERIFYING'
+  | 'PLANNING'
+  | 'BLOCKED_DEPENDENCY';
+
+export interface DashboardExecutionQueueItem {
+  id: string;
+  key: string;
+  title: string;
+  status: 'BACKLOG' | 'TODO' | 'IN_PROGRESS' | 'IN_REVIEW';
+  priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  queue_position: number;
+  execution_state: DashboardExecutionState;
+  is_next_work: boolean;
+  epic?: Epic;
+  changes_count: number;
+  tasks_total: number;
+  tasks_completed: number;
+  progress_pct: number;
+  open_questions_count: number;
+  pending_dependencies_count: number;
+  pending_dependency_keys: string[];
+  updated_at: string;
+}
+
 export interface ProjectDashboardResponse {
   project_id: string;
   project_key: string;
@@ -298,4 +394,8 @@ export interface ProjectDashboardResponse {
   recent_completed_stories: DashboardCompletedStoryItem[];
   last_completed_change: DashboardCompletedChangeItem | null;
   recent_completed_changes: DashboardCompletedChangeItem[];
+  next_work?: NextWorkResponse | null;
+  review_items_count: number;
+  review_items: DashboardReviewItem[];
+  execution_queue: DashboardExecutionQueueItem[];
 }

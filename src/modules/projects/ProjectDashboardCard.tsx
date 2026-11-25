@@ -71,10 +71,9 @@ export const ProjectDashboardCard: React.FC<ProjectDashboardCardProps> = ({ proj
 
       <CardFooter className="pt-2 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center space-x-1">
-          <Link to={`/projects/${project.key}/dashboard`}>
-            <Button variant="ghost" size="sm" className="text-xs text-indigo-700 hover:bg-indigo-50 flex items-center space-x-1">
-              <Activity className="w-3.5 h-3.5" />
-              <span>Operaciones</span>
+          <Link to={`/projects/${project.key}/kanban`}>
+            <Button variant="ghost" size="sm" className="text-xs text-slate-600 hover:bg-slate-100">
+              Tablero Kanban
             </Button>
           </Link>
           <Link to={`/projects/${project.key}/changes`}>
@@ -84,8 +83,9 @@ export const ProjectDashboardCard: React.FC<ProjectDashboardCardProps> = ({ proj
           </Link>
         </div>
         <Link to={`/projects/${project.key}`}>
-          <Button variant="primary" size="sm" className="flex items-center space-x-1">
-            <span>Tablero Kanban</span>
+          <Button variant="primary" size="sm" className="flex items-center space-x-1.5">
+            <Activity className="w-3.5 h-3.5" />
+            <span>Dashboard Operativo</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </Button>
         </Link>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Routes, Route, useParams, Link } from 'react-router-dom';
+import { Routes, Route, useParams, Link, Navigate, useMatch } from 'react-router-dom';
 import { Header } from './components/layout/Header';
 import { useProjectsListQuery } from './hooks/useProjectsListQuery';
 import { useStoriesBoardQuery } from './hooks/useStoriesBoardQuery';
@@ -275,7 +275,7 @@ function BoardView() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center space-x-3">
-          <Link to="/" className="p-2 rounded-lg hover:bg-slate-200 transition text-slate-500">
+          <Link to={`/projects/${projectKey}`} className="p-2 rounded-lg hover:bg-slate-200 transition text-slate-500">
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <div>
@@ -290,7 +290,7 @@ function BoardView() {
         </div>
 
         <div className="flex items-center space-x-2">
-          <Link to={`/projects/${projectKey}/dashboard`}>
+          <Link to={`/projects/${projectKey}`}>
             <Button variant="outline" size="sm" className="flex items-center space-x-1.5 text-xs">
               <Activity className="w-4 h-4" />
               <span>Dashboard Operativo</span>
@@ -680,19 +680,33 @@ function ProjectOperationsDashboardView() {
   return <ProjectOperationsDashboard projectKey={projectKey!} />;
 }
 
+function ProjectDashboardRedirect() {
+  const { projectKey } = useParams<{ projectKey: string }>();
+  return <Navigate to={`/projects/${projectKey}`} replace />;
+}
+
 // ==========================================
 // Main App Component with Routing
 // ==========================================
 export default function App() {
+  const isCockpitRoute = Boolean(useMatch('/projects/:projectKey'));
+
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
       <Header />
-      <main className="flex-1 max-w-[1600px] w-full mx-auto px-6 py-8">
+      <main
+        className={`flex-1 max-w-[1600px] w-full mx-auto px-6 ${
+          isCockpitRoute
+            ? 'py-3 lg:h-[calc(100vh-4.1rem)] lg:overflow-hidden flex flex-col'
+            : 'py-8'
+        }`}
+      >
         <Routes>
           <Route path="/" element={<DashboardView />} />
           <Route path="/questions" element={<QuestionsView />} />
-          <Route path="/projects/:projectKey" element={<BoardView />} />
-          <Route path="/projects/:projectKey/dashboard" element={<ProjectOperationsDashboardView />} />
+          <Route path="/projects/:projectKey" element={<ProjectOperationsDashboardView />} />
+          <Route path="/projects/:projectKey/kanban" element={<BoardView />} />
+          <Route path="/projects/:projectKey/dashboard" element={<ProjectDashboardRedirect />} />
           <Route path="/projects/:projectKey/changes" element={<ChangesAndReposView />} />
         </Routes>
       </main>
