@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FolderGit2, ArrowRight, HelpCircle, Layers } from 'lucide-react';
+import { ArrowRight, HelpCircle, Layers, Activity } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '../../components/ui/card';
 import { Badge } from '../../components/ui/badge';
 import { Button } from '../../components/ui/button';
@@ -69,12 +69,20 @@ export const ProjectDashboardCard: React.FC<ProjectDashboardCardProps> = ({ proj
         </div>
       </CardContent>
 
-      <CardFooter className="pt-2 border-t border-slate-100 flex justify-between">
-        <Link to={`/projects/${project.key}/changes`}>
-          <Button variant="ghost" size="sm" className="text-xs text-slate-600">
-            Changes & Repos
-          </Button>
-        </Link>
+      <CardFooter className="pt-2 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
+        <div className="flex items-center space-x-1">
+          <Link to={`/projects/${project.key}/dashboard`}>
+            <Button variant="ghost" size="sm" className="text-xs text-indigo-700 hover:bg-indigo-50 flex items-center space-x-1">
+              <Activity className="w-3.5 h-3.5" />
+              <span>Operaciones</span>
+            </Button>
+          </Link>
+          <Link to={`/projects/${project.key}/changes`}>
+            <Button variant="ghost" size="sm" className="text-xs text-slate-600">
+              Changes & Repos
+            </Button>
+          </Link>
+        </div>
         <Link to={`/projects/${project.key}`}>
           <Button variant="primary" size="sm" className="flex items-center space-x-1">
             <span>Tablero Kanban</span>

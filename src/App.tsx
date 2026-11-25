@@ -6,6 +6,7 @@ import { useStoriesBoardQuery } from './hooks/useStoriesBoardQuery';
 import { useUngroupedChangesQuery } from './hooks/useUngroupedChangesQuery';
 import { useQuestionsInboxQuery } from './hooks/useQuestionsInboxQuery';
 import { ProjectDashboardCard } from './modules/projects/ProjectDashboardCard';
+import { ProjectOperationsDashboard } from './modules/projects/ProjectOperationsDashboard';
 import { ProjectRepositoryMatrix } from './modules/projects/ProjectRepositoryMatrix';
 import { ProjectRepositoryGraph } from './modules/projects/ProjectRepositoryGraph';
 import { ProjectConstitutionView } from './modules/projects/ProjectConstitutionView';
@@ -26,7 +27,7 @@ import { projectsService } from './services/projectsService';
 import { storiesService } from './services/storiesService';
 import { changesService } from './services/changesService';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Plus, HelpCircle, Layers, ArrowLeft, RefreshCw, CheckSquare, FileText } from 'lucide-react';
+import { Plus, HelpCircle, Layers, ArrowLeft, RefreshCw, CheckSquare, FileText, Activity } from 'lucide-react';
 import { Story, Change } from './types';
 
 // ==========================================
@@ -288,12 +289,20 @@ function BoardView() {
           </div>
         </div>
 
-        <Link to={`/projects/${projectKey}/changes`}>
-          <Button variant="outline" size="sm" className="flex items-center space-x-1.5 text-xs">
-            <Layers className="w-4 h-4" />
-            <span>Ver Changes Sin Agrupar & Repos</span>
-          </Button>
-        </Link>
+        <div className="flex items-center space-x-2">
+          <Link to={`/projects/${projectKey}/dashboard`}>
+            <Button variant="outline" size="sm" className="flex items-center space-x-1.5 text-xs">
+              <Activity className="w-4 h-4" />
+              <span>Dashboard Operativo</span>
+            </Button>
+          </Link>
+          <Link to={`/projects/${projectKey}/changes`}>
+            <Button variant="outline" size="sm" className="flex items-center space-x-1.5 text-xs">
+              <Layers className="w-4 h-4" />
+              <span>Ver Changes Sin Agrupar & Repos</span>
+            </Button>
+          </Link>
+        </div>
       </div>
 
       <BoardFilterToolbar
@@ -666,6 +675,11 @@ function ChangesAndReposView() {
   );
 }
 
+function ProjectOperationsDashboardView() {
+  const { projectKey } = useParams<{ projectKey: string }>();
+  return <ProjectOperationsDashboard projectKey={projectKey!} />;
+}
+
 // ==========================================
 // Main App Component with Routing
 // ==========================================
@@ -678,6 +692,7 @@ export default function App() {
           <Route path="/" element={<DashboardView />} />
           <Route path="/questions" element={<QuestionsView />} />
           <Route path="/projects/:projectKey" element={<BoardView />} />
+          <Route path="/projects/:projectKey/dashboard" element={<ProjectOperationsDashboardView />} />
           <Route path="/projects/:projectKey/changes" element={<ChangesAndReposView />} />
         </Routes>
       </main>

@@ -2,6 +2,7 @@ import { request } from './apiClient';
 import {
   Project,
   ProjectConstitutionResponse,
+  ProjectDashboardResponse,
   ProjectRepository,
   Epic,
   RepositoryGraphResponse,
@@ -16,6 +17,12 @@ export const projectsService = {
 
   getProject: async (projectRef: string) => {
     return request<Project>(`projects/${projectRef}`);
+  },
+
+  getProjectDashboard: async (projectRef: string, recentLimit = 10) => {
+    return request<ProjectDashboardResponse>(
+      `projects/${projectRef}/dashboard?recent_limit=${recentLimit}`,
+    );
   },
 
   createProject: async (payload: { key: string; name: string; description?: string; workspace_path?: string }) => {

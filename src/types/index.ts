@@ -102,6 +102,7 @@ export interface Change {
   tasks_completed: number;
   open_questions_count: number;
   synced_at?: string;
+  completed_at?: string | null;
   artifacts?: ChangeArtifact[];
   tasks?: TaskItem[];
 }
@@ -146,6 +147,7 @@ export interface Story {
   pending_dependency_keys?: string[];
   closed_dependency_keys?: string[];
   changes: Change[];
+  completed_at?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -231,4 +233,69 @@ export interface RepositoryGraphResponse {
   nodes: RepositoryGraphNode[];
   edges: RepositoryGraphEdge[];
   aliases: RepositoryServiceAlias[];
+}
+
+export interface DashboardPendingStoryItem {
+  id: string;
+  key: string;
+  title: string;
+  status: 'BACKLOG' | 'TODO';
+  priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  epic?: Epic;
+  changes_count: number;
+  tasks_total: number;
+  tasks_completed: number;
+  progress_pct: number;
+  open_questions_count: number;
+  pending_dependencies_count: number;
+  updated_at: string;
+}
+
+export interface DashboardCompletedStoryItem {
+  id: string;
+  key: string;
+  title: string;
+  status: 'DONE';
+  priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  epic?: Epic;
+  tasks_total: number;
+  tasks_completed: number;
+  completed_at?: string | null;
+  finished_at: string;
+  is_estimated_time: boolean;
+}
+
+export interface DashboardCompletedChangeItem {
+  id: string;
+  key?: string | null;
+  change_slug: string;
+  phase: 'ARCHIVED' | 'VERIFYING';
+  repository_name?: string | null;
+  repo_type?: string | null;
+  story_id?: string | null;
+  story_key?: string | null;
+  story_title?: string | null;
+  tasks_total: number;
+  tasks_completed: number;
+  completed_at?: string | null;
+  finished_at: string;
+  is_estimated_time: boolean;
+}
+
+export interface ProjectDashboardResponse {
+  project_id: string;
+  project_key: string;
+  project_name: string;
+  pending_total: number;
+  backlog_count: number;
+  todo_count: number;
+  in_progress_count: number;
+  in_review_count: number;
+  open_questions_count: number;
+  blocking_questions_count: number;
+  pending_stories: DashboardPendingStoryItem[];
+  last_completed_story: DashboardCompletedStoryItem | null;
+  recent_completed_stories: DashboardCompletedStoryItem[];
+  last_completed_change: DashboardCompletedChangeItem | null;
+  recent_completed_changes: DashboardCompletedChangeItem[];
 }
