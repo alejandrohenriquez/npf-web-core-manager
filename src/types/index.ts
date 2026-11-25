@@ -74,7 +74,7 @@ export interface ChangeArtifact {
   rel_path: string;
   content: string;
   source_sha256: string;
-  review_status: 'UNREVIEWED' | 'APPROVED';
+  review_status: 'UNREVIEWED' | 'APPROVED' | 'NEEDS_CHANGES';
   approved_sha256?: string;
   is_approval_stale?: boolean;
   synced_at: string;
@@ -174,7 +174,7 @@ export interface OpenQuestion {
   options: QuestionOption[];
   selected_options?: any[];
   answer_text?: string;
-  status: 'OPEN' | 'ANSWERED' | 'DISMISSED';
+  status: 'OPEN' | 'ANSWERED' | 'APPLIED' | 'DISMISSED';
   asked_by: 'ANTIGRAVITY' | 'USER';
   created_at: string;
   answered_at?: string;

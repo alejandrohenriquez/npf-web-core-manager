@@ -31,7 +31,8 @@ export const QuestionInboxList: React.FC<QuestionInboxListProps> = ({ questions 
   };
 
   const filtered = questions.filter((q) => {
-    if (statusFilter !== 'ALL' && q.status !== statusFilter) return false;
+    if (statusFilter === 'OPEN' && q.status !== 'OPEN') return false;
+    if (statusFilter === 'ANSWERED' && q.status !== 'ANSWERED' && q.status !== 'APPLIED') return false;
     if (onlyBlocking && !q.is_blocking) return false;
     return true;
   });

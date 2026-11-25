@@ -69,6 +69,7 @@ export const OpenSpecArtifactReadOnlyViewer: React.FC<OpenSpecArtifactReadOnlyVi
   };
 
   const isApproved = currentArt?.review_status === 'APPROVED';
+  const isNeedsChanges = currentArt?.review_status === 'NEEDS_CHANGES';
   const isStale = currentArt?.is_approval_stale;
   const lineCount = currentArt?.content ? currentArt.content.split('\n').length : 0;
 
@@ -137,6 +138,13 @@ export const OpenSpecArtifactReadOnlyViewer: React.FC<OpenSpecArtifactReadOnlyVi
               <Copy className="w-3.5 h-3.5 mr-1" />
               <span>{copied ? 'Copiado' : 'Copiar'}</span>
             </Button>
+
+            {isNeedsChanges && (
+              <Badge variant="destructive" className="flex items-center space-x-1 text-[10px]">
+                <AlertTriangle className="w-3 h-3 mr-0.5" />
+                <span>Requiere ajustes</span>
+              </Badge>
+            )}
 
             {isStale && (
               <Badge variant="warning" className="flex items-center space-x-1 text-[10px]">

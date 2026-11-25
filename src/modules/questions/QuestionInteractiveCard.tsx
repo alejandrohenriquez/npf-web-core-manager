@@ -18,7 +18,8 @@ export const QuestionInteractiveCard: React.FC<QuestionInteractiveCardProps> = (
   onAnswer,
   onDismiss,
 }) => {
-  const isAnswered = question.status === 'ANSWERED';
+  const isAnswered = question.status === 'ANSWERED' || question.status === 'APPLIED';
+  const isApplied = question.status === 'APPLIED';
 
   return (
     <Card className="border-slate-200 overflow-hidden shadow-sm">
@@ -35,8 +36,11 @@ export const QuestionInteractiveCard: React.FC<QuestionInteractiveCardProps> = (
               </Badge>
             )}
           </div>
-          <Badge variant={isAnswered ? 'success' : 'warning'} className="text-[11px]">
-            {question.status}
+          <Badge
+            variant={isApplied ? 'success' : isAnswered ? 'secondary' : 'warning'}
+            className="text-[11px]"
+          >
+            {isApplied ? 'APPLIED' : isAnswered ? 'ANSWERED · Pend. aplicar' : question.status}
           </Badge>
         </div>
       </CardHeader>
