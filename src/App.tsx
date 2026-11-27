@@ -696,9 +696,7 @@ export default function App() {
       <Header />
       <main
         className={`flex-1 max-w-[1600px] w-full mx-auto px-6 ${
-          isCockpitRoute
-            ? 'py-3 lg:h-[calc(100vh-4.1rem)] lg:overflow-hidden flex flex-col'
-            : 'py-8'
+          isCockpitRoute ? 'py-4' : 'py-8'
         }`}
       >
         <Routes>

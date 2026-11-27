@@ -323,7 +323,9 @@ export interface NextWorkResponse {
 export type DashboardReviewItemKind =
   | 'BLOCKING_QUESTION'
   | 'ARTIFACT_APPROVAL'
+  | 'STALLED_CHANGE'
   | 'VERIFYING_ARCHIVE'
+  | 'ANSWERED_QUESTION'
   | 'PENDING_DEPENDENCY'
   | 'PLANNING_INCOMPLETE';
 
@@ -378,6 +380,76 @@ export interface DashboardExecutionQueueItem {
   updated_at: string;
 }
 
+export interface DashboardHumanAttention {
+  total: number;
+  open_questions_count: number;
+  pending_approvals_count: number;
+  stalled_changes_count: number;
+  items: DashboardReviewItem[];
+}
+
+export interface DashboardActiveChangeHealth {
+  change_id: string;
+  change_key?: string | null;
+  change_slug: string;
+  phase: string;
+  repository_name?: string | null;
+  tasks_completed: number;
+  tasks_total: number;
+  started_at?: string | null;
+  last_progress_at?: string | null;
+  elapsed_seconds: number;
+  is_stalled: boolean;
+  story_id?: string | null;
+  story_key?: string | null;
+  story_title?: string | null;
+  story_tasks_completed: number;
+  story_tasks_total: number;
+  story_progress_pct: number;
+}
+
+export interface DashboardEngineHealth {
+  status: 'ACTIVE' | 'STALLED' | 'IDLE' | 'BLOCKED';
+  threshold_seconds: number;
+  active_change?: DashboardActiveChangeHealth | null;
+}
+
+export interface DashboardProgressSummary {
+  stories_done: number;
+  stories_active: number;
+  stories_planning: number;
+  stories_blocked_dep: number;
+  stories_blocked_human: number;
+  stories_total: number;
+  tasks_completed: number;
+  tasks_total: number;
+  unestimated_stories_count: number;
+}
+
+export interface DashboardThroughputBucket {
+  bucket_start: string;
+  label: string;
+  tasks_completed: number;
+  changes_completed: number;
+  stories_completed: number;
+}
+
+export interface DashboardThroughput {
+  window_24h: DashboardThroughputBucket[];
+  window_7d: DashboardThroughputBucket[];
+  tasks_completed_24h: number;
+  tasks_completed_7d: number;
+  changes_completed_24h: number;
+  changes_completed_7d: number;
+  stories_completed_24h: number;
+  stories_completed_7d: number;
+  tasks_per_hour_24h: number;
+  tasks_per_day_7d: number;
+  trend_pct: number;
+  trend_direction: 'UP' | 'DOWN' | 'FLAT';
+  avg_change_cycle_minutes?: number | null;
+}
+
 export interface ProjectDashboardResponse {
   project_id: string;
   project_key: string;
@@ -398,4 +470,10 @@ export interface ProjectDashboardResponse {
   review_items_count: number;
   review_items: DashboardReviewItem[];
   execution_queue: DashboardExecutionQueueItem[];
+  human_attention?: DashboardHumanAttention;
+  pipeline_pending_items?: DashboardReviewItem[];
+  dependency_waits?: DashboardReviewItem[];
+  engine_health?: DashboardEngineHealth;
+  progress_summary?: DashboardProgressSummary;
+  throughput?: DashboardThroughput;
 }
